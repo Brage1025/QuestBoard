@@ -70,22 +70,70 @@
 <Modal @ref="newQuestModal" Title="Create New Quest" IsVerticallyCentered="true">
 
     <BodyTemplate>
-        <p>Our quest form will go here.</p>
+
+        <EditForm EditContext="newQuestEditContext" OnValidSubmit="CreateQuest">
+
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label class="form-label">Quest Name</label>
+
+                <InputText @bind-Value="newQuest.Name" class="form-control" />
+
+                <ValidationMessage For="@(() => newQuest.Name)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+
+                <InputTextArea @bind-Value="newQuest.Description" class="form-control" rows="3" />
+
+                <ValidationMessage For="@(() => newQuest.Description)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Difficulty</label>
+
+                <InputSelect @bind-Value="newQuest.Difficulty" class="form-select">
+
+                    @foreach (var difficulty in Enum.GetValues<QuestDifficulty>())
+                    {
+                        <option value="@difficulty">
+                            @difficulty
+                        </option>
+                    }
+
+                </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Reward</label>
+
+                <InputText @bind-Value="newQuest.Reward" class="form-control" />
+
+                <ValidationMessage For="@(() => newQuest.Reward)" />
+            </div>
+
+        </EditForm>
+
     </BodyTemplate>
 
     <FooterTemplate>
+
         <Button Color="ButtonColor.Secondary" @onclick="CloseNewQuestModal">
             Cancel
         </Button>
 
-        <Button Color="ButtonColor.Primary">
+        <Button Color="ButtonColor.Primary" @onclick="SubmitNewQuest">
             Create Quest
         </Button>
+
     </FooterTemplate>
 
 </Modal>
 
 @code {
+
     private List<Quest> Quests => QuestService.GetQuests();
 
     private int AvailableCount =>
@@ -96,12 +144,56 @@
 
     private int CompletedCount =>
         Quests.Count(q => q.Status == QuestStatus.Completed);
-    
+
     private Modal newQuestModal = default!;
+
+    private Quest newQuest = new()
+    {
+        Difficulty = QuestDifficulty.Medium,
+        Status = QuestStatus.Available
+    };
+
+    private EditContext newQuestEditContext = default!;
+
+    protected override void OnInitialized()
+    {
+        newQuestEditContext = new EditContext(newQuest);
+    }
 
     private async Task OpenNewQuestModal()
     {
+        newQuest = new Quest
+        {
+            Difficulty = QuestDifficulty.Medium,
+            Status = QuestStatus.Available
+        };
+
+        newQuestEditContext = new EditContext(newQuest);
+
         await newQuestModal.ShowAsync();
+    }
+
+    private async Task SubmitNewQuest()
+    {
+        if (newQuestEditContext.Validate())
+        {
+            await CreateQuest();
+        }
+    }
+
+    private async Task CreateQuest()
+    {
+        QuestService.AddQuest(newQuest);
+
+        newQuest = new Quest
+        {
+            Difficulty = QuestDifficulty.Medium,
+            Status = QuestStatus.Available
+        };
+
+        newQuestEditContext = new EditContext(newQuest);
+
+        await newQuestModal.HideAsync();
     }
 
     private async Task CloseNewQuestModal()

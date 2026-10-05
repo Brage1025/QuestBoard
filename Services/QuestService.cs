@@ -41,4 +41,13 @@ public class QuestService
     {
         return _quests;
     }
+    public void AddQuest(Quest quest)
+    {
+        quest.Id = _quests.Count == 0
+            ? 1
+            : _quests.Max(q => q.Id) + 1;
+
+        _quests.Add(quest);
+    }
 }
+
