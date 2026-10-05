@@ -2,6 +2,7 @@
 
 <Card Class="h-100 shadow-sm">
     <CardBody>
+
         <div class="d-flex justify-content-between align-items-start mb-2">
             <CardTitle>@Quest.Name</CardTitle>
 
@@ -22,12 +23,44 @@
         <Badge Color="@GetStatusColor()">
             @Quest.Status
         </Badge>
+
+        <div class="mt-3">
+
+            @if (Quest.Status == QuestStatus.Available)
+            {
+                <Button Color="ButtonColor.Primary" Size="ButtonSize.Small" @onclick="StartQuest">
+                    Start Quest
+                </Button>
+            }
+            else if (Quest.Status == QuestStatus.InProgress)
+            {
+                <Button Color="ButtonColor.Success" Size="ButtonSize.Small" @onclick="CompleteQuest">
+                    Complete Quest
+                </Button>
+            }
+
+        </div>
+
     </CardBody>
 </Card>
 
 @code {
+
     [Parameter]
     public Quest Quest { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<QuestStatus> StatusChanged { get; set; }
+
+    private async Task StartQuest()
+    {
+        await StatusChanged.InvokeAsync(QuestStatus.InProgress);
+    }
+
+    private async Task CompleteQuest()
+    {
+        await StatusChanged.InvokeAsync(QuestStatus.Completed);
+    }
 
     private BadgeColor GetDifficultyColor()
     {

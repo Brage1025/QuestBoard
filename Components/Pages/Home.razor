@@ -59,7 +59,9 @@
         @foreach (var quest in Quests)
         {
             <div class="col-12 col-md-6 col-lg-4">
-                <QuestCard Quest="quest" />
+
+                <QuestCard Quest="@quest" StatusChanged="@((QuestStatus status) => UpdateQuestStatus(quest.Id, status))" />
+
             </div>
         }
 
@@ -199,5 +201,10 @@
     private async Task CloseNewQuestModal()
     {
         await newQuestModal.HideAsync();
+    }
+
+    private void UpdateQuestStatus(int questId, QuestStatus status)
+    {
+        QuestService.UpdateStatus(questId, status);
     }
 }

@@ -49,5 +49,15 @@ public class QuestService
 
         _quests.Add(quest);
     }
+
+    public void UpdateStatus(int questId, QuestStatus status)
+    {
+        var quest = _quests.FirstOrDefault(q => q.Id == questId);
+
+        if (quest is not null)
+        {
+            quest.Status = status;
+        }
+    }
 }
 
