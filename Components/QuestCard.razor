@@ -1,0 +1,54 @@
+@using QuestBoard.Models
+
+<Card Class="h-100 shadow-sm">
+    <CardBody>
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <CardTitle>@Quest.Name</CardTitle>
+
+            <Badge Color="@GetDifficultyColor()">
+                @Quest.Difficulty
+            </Badge>
+        </div>
+
+        <CardText>
+            @Quest.Description
+        </CardText>
+
+        <div class="mb-3">
+            <small class="text-muted">Reward</small>
+            <div>🪙 @Quest.Reward</div>
+        </div>
+
+        <Badge Color="@GetStatusColor()">
+            @Quest.Status
+        </Badge>
+    </CardBody>
+</Card>
+
+@code {
+    [Parameter]
+    public Quest Quest { get; set; } = default!;
+
+    private BadgeColor GetDifficultyColor()
+    {
+        return Quest.Difficulty switch
+        {
+            QuestDifficulty.Easy => BadgeColor.Success,
+            QuestDifficulty.Medium => BadgeColor.Warning,
+            QuestDifficulty.Hard => BadgeColor.Danger,
+            QuestDifficulty.Deadly => BadgeColor.Dark,
+            _ => BadgeColor.Secondary
+        };
+    }
+
+    private BadgeColor GetStatusColor()
+    {
+        return Quest.Status switch
+        {
+            QuestStatus.Available => BadgeColor.Primary,
+            QuestStatus.InProgress => BadgeColor.Warning,
+            QuestStatus.Completed => BadgeColor.Success,
+            _ => BadgeColor.Secondary
+        };
+    }
+}

@@ -1,0 +1,80 @@
+﻿@page "/"
+
+@using QuestBoard.Models
+@using QuestBoard.Services
+
+@inject QuestService QuestService
+
+<PageTitle>Quest Board</PageTitle>
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+        <h1>⚔ Quest Board</h1>
+            <p class="text-muted mb-0">
+                Adventures await those brave enough to accept them.
+            </p>
+        </div>
+
+        <Button Color="ButtonColor.Primary">
+            + New Quest
+        </Button>
+    </div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+        <Card>
+            <CardBody>
+                <CardTitle>Available</CardTitle>
+                <h2>@AvailableCount</h2>
+            </CardBody>
+        </Card>
+    </div>
+
+    <div class="col-md-4">
+        <Card>
+            <CardBody>
+                <CardTitle>In Progress</CardTitle>
+                <h2>@InProgressCount</h2>
+            </CardBody>
+        </Card>
+    </div>
+
+    <div class="col-md-4">
+        <Card>
+            <CardBody>
+                <CardTitle>Completed</CardTitle>
+                <h2>@CompletedCount</h2>
+            </CardBody>
+        </Card>
+    </div>
+
+</div>
+
+    <div class="row g-4">
+
+        @foreach (var quest in Quests)
+        {
+            <div class="col-12 col-md-6 col-lg-4">
+                <QuestCard Quest="quest" />
+            </div>
+        }
+
+    </div>
+
+</div>
+
+@code {
+    private List<Quest> Quests => QuestService.GetQuests();
+
+    private int AvailableCount =>
+        Quests.Count(q => q.Status == QuestStatus.Available);
+
+    private int InProgressCount =>
+        Quests.Count(q => q.Status == QuestStatus.InProgress);
+
+    private int CompletedCount =>
+        Quests.Count(q => q.Status == QuestStatus.Completed);
+}
