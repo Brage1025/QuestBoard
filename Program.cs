@@ -1,3 +1,4 @@
+using BlazorBootstrap;
 using QuestBoard.Components;
 using QuestBoard.Services;
 
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddBlazorBootstrap();
 builder.Services.AddScoped<QuestService>();
 
 var app = builder.Build();
