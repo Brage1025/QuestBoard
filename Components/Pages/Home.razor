@@ -54,9 +54,32 @@
 
     </div>
 
+    <!-- Quest filters -->
+    <div class="d-flex gap-2 mb-4">
+
+        <Button Color="@GetFilterButtonColor(QuestFilter.All)" @onclick="() => SetFilter(QuestFilter.All)">
+            All
+        </Button>
+
+        <Button Color="@GetFilterButtonColor(QuestFilter.Available)" @onclick="() => SetFilter(QuestFilter.Available)">
+            Available
+        </Button>
+
+        <Button Color="@GetFilterButtonColor(QuestFilter.InProgress)"
+                @onclick="() => SetFilter(QuestFilter.InProgress)">
+            In Progress
+        </Button>
+
+        <Button Color="@GetFilterButtonColor(QuestFilter.Completed)" @onclick="() => SetFilter(QuestFilter.Completed)">
+            Completed
+        </Button>
+
+    </div>
+
+    <!-- Quest cards -->
     <div class="row g-4">
 
-        @foreach (var quest in Quests)
+        @foreach (var quest in FilteredQuests)
         {
             <div class="col-12 col-md-6 col-lg-4">
 
@@ -147,6 +170,23 @@
     private int CompletedCount =>
         Quests.Count(q => q.Status == QuestStatus.Completed);
 
+    private QuestFilter selectedFilter = QuestFilter.All;
+
+    private IEnumerable<Quest> FilteredQuests =>
+        selectedFilter switch
+        {
+            QuestFilter.Available =>
+                Quests.Where(q => q.Status == QuestStatus.Available),
+
+            QuestFilter.InProgress =>
+                Quests.Where(q => q.Status == QuestStatus.InProgress),
+
+            QuestFilter.Completed =>
+                Quests.Where(q => q.Status == QuestStatus.Completed),
+
+            _ => Quests
+        };
+
     private Modal newQuestModal = default!;
 
     private Quest newQuest = new()
@@ -160,6 +200,18 @@
     protected override void OnInitialized()
     {
         newQuestEditContext = new EditContext(newQuest);
+    }
+
+    private void SetFilter(QuestFilter filter)
+    {
+        selectedFilter = filter;
+    }
+
+    private ButtonColor GetFilterButtonColor(QuestFilter filter)
+    {
+        return selectedFilter == filter
+            ? ButtonColor.Primary
+            : ButtonColor.Secondary;
     }
 
     private async Task OpenNewQuestModal()
@@ -206,5 +258,13 @@
     private void UpdateQuestStatus(int questId, QuestStatus status)
     {
         QuestService.UpdateStatus(questId, status);
+    }
+
+    private enum QuestFilter
+    {
+        All,
+        Available,
+        InProgress,
+        Completed
     }
 }
