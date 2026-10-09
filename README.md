@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./wwwroot/images/quest-board-logo.jpg" alt="Quest Board Logo" style="border-radius: 15px;" width="250">
+  <img src="./wwwroot/images/quest-board-logo.jpg" alt="Quest Board Logo" style="border-radius: 25px;" width="250">
 </p>
 
 <h1 align="center" style="color:#f2d58a">Quest Board</h1>
