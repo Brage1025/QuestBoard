@@ -1,9 +1,9 @@
 @using QuestBoard.Models
 
-<Card Class="h-100 shadow-sm">
+<Card Class="quest-card h-100">
     <CardBody>
 
-        <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
             <CardTitle>@Quest.Name</CardTitle>
 
             <Badge Color="@GetDifficultyColor()">
@@ -16,18 +16,21 @@
         </CardText>
 
         <div class="mb-3">
-            <small class="text-muted">Reward</small>
+            <small class="text-muted">REWARD:</small>
             <div>🪙 @Quest.Reward</div>
         </div>
 
-        <Badge Color="@GetStatusColor()">
-            @Quest.Status
-        </Badge>
+        <div class="mb-3">
+            <Badge Color="@GetStatusColor()">
+                @Quest.Status
+            </Badge>
+        </div>
 
-        <!-- Objective progress -->
         <div class="mt-4 mb-3">
+
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <strong>Objectives</strong>
+
                 <small class="text-muted">
                     @CompletedObjectiveCount / @Quest.Objectives.Count
                 </small>
@@ -37,6 +40,7 @@
             {
                 <div class="progress mb-3" role="progressbar" aria-label="Objective completion"
                      aria-valuenow="@ObjectiveProgressPercent" aria-valuemin="0" aria-valuemax="100">
+
                     <div class="progress-bar" style="@($"width: {ObjectiveProgressPercent}%")">
                     </div>
                 </div>
@@ -78,6 +82,7 @@
                     Add
                 </button>
             </div>
+
         </div>
 
         <div class="mt-3 d-flex flex-wrap gap-2">
@@ -173,7 +178,6 @@
         }
 
         await ObjectiveAdded.InvokeAsync(newObjectiveDescription);
-
         newObjectiveDescription = string.Empty;
     }
 

@@ -8,11 +8,11 @@
 
 <PageTitle>Quest Board</PageTitle>
 
-<div class="container py-4">
+<div class="container py-4 quest-log-page">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h1>⚔ Quest Board</h1>
+            <h1>⚔ Quest Log</h1>
             <p class="text-muted mb-0">
                 Adventures await those brave enough to accept them.
             </p>
@@ -23,7 +23,6 @@
         </Button>
     </div>
 
-    <!-- Dashboard counters -->
     <div class="row g-3 mb-4">
 
         <div class="col-md-4">
@@ -55,7 +54,6 @@
 
     </div>
 
-    <!-- Search -->
     <div class="mb-3">
         <label for="questSearch" class="form-label">
             Search quests
@@ -65,7 +63,6 @@
                @bind="searchText" @bind:event="oninput" />
     </div>
 
-    <!-- Quest filters -->
     <div class="d-flex flex-wrap gap-2 mb-4">
 
         <Button Color="@GetFilterButtonColor(QuestFilter.All)" @onclick="() => SetFilter(QuestFilter.All)">
@@ -87,7 +84,6 @@
 
     </div>
 
-    <!-- Quest cards -->
     <div class="row g-4">
 
         @if (FilteredQuests.Any())
@@ -121,58 +117,43 @@
 
 </div>
 
-<!-- Create quest modal -->
 <Modal @ref="newQuestModal" Title="Create New Quest" IsVerticallyCentered="true">
 
     <BodyTemplate>
-
         <EditForm EditContext="newQuestEditContext">
             <DataAnnotationsValidator />
 
             <div class="mb-3">
                 <label class="form-label">Quest Name</label>
-
                 <InputText @bind-Value="newQuest.Name" class="form-control" />
-
                 <ValidationMessage For="@(() => newQuest.Name)" />
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Description</label>
-
                 <InputTextArea @bind-Value="newQuest.Description" class="form-control" rows="3" />
-
                 <ValidationMessage For="@(() => newQuest.Description)" />
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Difficulty</label>
-
                 <InputSelect @bind-Value="newQuest.Difficulty" class="form-select">
-
                     @foreach (var difficulty in Enum.GetValues<QuestDifficulty>())
                     {
-                        <option value="@difficulty">
-                            @difficulty
-                        </option>
+                        <option value="@difficulty">@difficulty</option>
                     }
-
                 </InputSelect>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Reward</label>
-
                 <InputText @bind-Value="newQuest.Reward" class="form-control" />
-
                 <ValidationMessage For="@(() => newQuest.Reward)" />
             </div>
         </EditForm>
-
     </BodyTemplate>
 
     <FooterTemplate>
-
         <Button Color="ButtonColor.Secondary" @onclick="CloseNewQuestModal">
             Cancel
         </Button>
@@ -180,63 +161,47 @@
         <Button Color="ButtonColor.Primary" @onclick="SubmitNewQuest">
             Create Quest
         </Button>
-
     </FooterTemplate>
 
 </Modal>
 
-<!-- Edit quest modal -->
 <Modal @ref="editQuestModal" Title="Edit Quest" IsVerticallyCentered="true">
 
     <BodyTemplate>
-
         <EditForm EditContext="editQuestEditContext">
             <DataAnnotationsValidator />
 
             <div class="mb-3">
                 <label class="form-label">Quest Name</label>
-
                 <InputText @bind-Value="editQuest.Name" class="form-control" />
-
                 <ValidationMessage For="@(() => editQuest.Name)" />
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Description</label>
-
                 <InputTextArea @bind-Value="editQuest.Description" class="form-control" rows="3" />
-
                 <ValidationMessage For="@(() => editQuest.Description)" />
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Difficulty</label>
-
                 <InputSelect @bind-Value="editQuest.Difficulty" class="form-select">
-
                     @foreach (var difficulty in Enum.GetValues<QuestDifficulty>())
                     {
-                        <option value="@difficulty">
-                            @difficulty
-                        </option>
+                        <option value="@difficulty">@difficulty</option>
                     }
-
                 </InputSelect>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Reward</label>
-
                 <InputText @bind-Value="editQuest.Reward" class="form-control" />
-
                 <ValidationMessage For="@(() => editQuest.Reward)" />
             </div>
         </EditForm>
-
     </BodyTemplate>
 
     <FooterTemplate>
-
         <Button Color="ButtonColor.Secondary" @onclick="CancelEditQuest">
             Cancel
         </Button>
@@ -244,12 +209,10 @@
         <Button Color="ButtonColor.Primary" @onclick="SubmitEditQuest">
             Save Changes
         </Button>
-
     </FooterTemplate>
 
 </Modal>
 
-<!-- Delete confirmation modal -->
 <Modal @ref="deleteQuestModal" Title="Delete Quest?" IsVerticallyCentered="true">
 
     <BodyTemplate>
@@ -264,7 +227,6 @@
     </BodyTemplate>
 
     <FooterTemplate>
-
         <Button Color="ButtonColor.Secondary" @onclick="CancelDelete">
             Cancel
         </Button>
@@ -272,13 +234,11 @@
         <Button Color="ButtonColor.Danger" @onclick="ConfirmDelete">
             Yes, Delete
         </Button>
-
     </FooterTemplate>
 
 </Modal>
 
 @code {
-
     private List<Quest> Quests => QuestService.GetQuests();
 
     private int AvailableCount =>
@@ -291,7 +251,6 @@
         Quests.Count(q => q.Status == QuestStatus.Completed);
 
     private string searchText = string.Empty;
-
     private QuestFilter selectedFilter = QuestFilter.All;
 
     private IEnumerable<Quest> FilteredQuests
@@ -318,13 +277,8 @@
             }
 
             return quests.Where(q =>
-                q.Name.Contains(
-                    searchText,
-                    StringComparison.OrdinalIgnoreCase)
-                ||
-                q.Description.Contains(
-                    searchText,
-                    StringComparison.OrdinalIgnoreCase));
+                q.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                || q.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
     }
 
@@ -372,7 +326,6 @@
         };
 
         newQuestEditContext = new EditContext(newQuest);
-
         await newQuestModal.ShowAsync();
     }
 
@@ -380,23 +333,17 @@
     {
         if (newQuestEditContext.Validate())
         {
-            await CreateQuest();
+            QuestService.AddQuest(newQuest);
+
+            newQuest = new Quest
+            {
+                Difficulty = QuestDifficulty.Medium,
+                Status = QuestStatus.Available
+            };
+
+            newQuestEditContext = new EditContext(newQuest);
+            await newQuestModal.HideAsync();
         }
-    }
-
-    private async Task CreateQuest()
-    {
-        QuestService.AddQuest(newQuest);
-
-        newQuest = new Quest
-        {
-            Difficulty = QuestDifficulty.Medium,
-            Status = QuestStatus.Available
-        };
-
-        newQuestEditContext = new EditContext(newQuest);
-
-        await newQuestModal.HideAsync();
     }
 
     private async Task CloseNewQuestModal()
@@ -406,7 +353,6 @@
 
     private async Task OpenEditQuestModal(Quest quest)
     {
-        // Edit a copy so Cancel doesn't change the original.
         editQuest = new Quest
         {
             Id = quest.Id,
@@ -419,7 +365,6 @@
         };
 
         editQuestEditContext = new EditContext(editQuest);
-
         await editQuestModal.ShowAsync();
     }
 
@@ -428,7 +373,6 @@
         if (editQuestEditContext.Validate())
         {
             QuestService.UpdateQuest(editQuest);
-
             await editQuestModal.HideAsync();
         }
     }

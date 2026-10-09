@@ -1,13 +1,59 @@
 ﻿@page "/counter"
-@rendermode InteractiveServer
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Counter - Quest Board</PageTitle>
 
-<h1>Counter</h1>
+<div class="container py-4 quest-log-page">
 
-<p role="status">Current count: @currentCount</p>
+    <div class="mb-4">
+        <h1>Counter</h1>
+        <p class="text-muted mb-0">
+            Every great adventure begins with a single step.
+        </p>
+    </div>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+
+            <div class="card text-center">
+                <div class="card-body py-5">
+
+                    <h4 class="card-title mb-4">
+                        Counter
+                    </h4>
+
+                    <p class="text-muted mb-2">
+                        Your current count
+                    </p>
+
+                    <div class="display-1 fw-bold mb-4" style="color: var(--wow-gold-bright);">
+                        @currentCount
+                    </div>
+
+                    <div class="d-flex justify-content-center flex-wrap gap-3">
+
+                        <button class="btn btn-primary px-4" @onclick="IncrementCount">
+                            + Increase
+                        </button>
+
+                        <button class="btn btn-secondary px-4" @onclick="ResetCount">
+                            ↻ Reset
+                        </button>
+
+                    </div>
+
+                    <hr class="my-4" style="border-color: var(--wow-border);" />
+
+                    <p class="text-muted small mb-0">
+                        Keep counting, adventurer. Your journey is just beginning.
+                    </p>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
 
 @code {
     private int currentCount = 0;
@@ -15,5 +61,10 @@
     private void IncrementCount()
     {
         currentCount++;
+    }
+
+    private void ResetCount()
+    {
+        currentCount = 0;
     }
 }
