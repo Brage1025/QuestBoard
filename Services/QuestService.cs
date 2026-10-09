@@ -41,6 +41,7 @@ public class QuestService
     {
         return _quests;
     }
+
     public void AddQuest(Quest quest)
     {
         quest.Id = _quests.Count == 0
@@ -59,5 +60,14 @@ public class QuestService
             quest.Status = status;
         }
     }
-}
 
+    public void DeleteQuest(int questId)
+    {
+        var quest = _quests.FirstOrDefault(q => q.Id == questId);
+
+        if (quest is not null)
+        {
+            _quests.Remove(quest);
+        }
+    }
+}
