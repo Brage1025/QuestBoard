@@ -55,6 +55,16 @@
 
     </div>
 
+    <!-- Search -->
+    <div class="mb-3">
+        <label for="questSearch" class="form-label">
+            Search quests
+        </label>
+
+        <input id="questSearch" type="search" class="form-control" placeholder="Search by name or description..."
+               @bind="searchText" @bind:event="oninput" />
+    </div>
+
     <!-- Quest filters -->
     <div class="d-flex flex-wrap gap-2 mb-4">
 
@@ -80,13 +90,27 @@
     <!-- Quest cards -->
     <div class="row g-4">
 
-        @foreach (var quest in FilteredQuests)
+        @if (FilteredQuests.Any())
         {
-            <div class="col-12 col-md-6 col-lg-4" @key="quest.Id">
+            @foreach (var quest in FilteredQuests)
+            {
+                <div class="col-12 col-md-6 col-lg-4" @key="quest.Id">
 
-                <QuestCard Quest="@quest" StatusChanged="@((QuestStatus status) => UpdateQuestStatus(quest.Id, status))"
-                           Deleted="@(() => RequestDeleteQuest(quest))" />
+                    <QuestCard Quest="@quest" StatusChanged="@((QuestStatus status) => UpdateQuestStatus(quest.Id, status))"
+                               Deleted="@(() => RequestDeleteQuest(quest))" />
 
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <h4>No quests found</h4>
+                    <p class="text-muted">
+                        Try another search term or select a different filter.
+                    </p>
+                </div>
             </div>
         }
 
@@ -164,7 +188,6 @@
 <Modal @ref="deleteQuestModal" Title="Delete Quest?" IsVerticallyCentered="true">
 
     <BodyTemplate>
-
         <p>
             Are you sure you want to delete
             <strong>@(questToDelete?.Name ?? "this quest")</strong>?
@@ -173,7 +196,6 @@
         <p class="text-muted mb-0">
             This action cannot be undone.
         </p>
-
     </BodyTemplate>
 
     <FooterTemplate>
@@ -203,22 +225,43 @@
     private int CompletedCount =>
         Quests.Count(q => q.Status == QuestStatus.Completed);
 
+    private string searchText = string.Empty;
+
     private QuestFilter selectedFilter = QuestFilter.All;
 
-    private IEnumerable<Quest> FilteredQuests =>
-        selectedFilter switch
+    private IEnumerable<Quest> FilteredQuests
+    {
+        get
         {
-            QuestFilter.Available =>
-                Quests.Where(q => q.Status == QuestStatus.Available),
+            IEnumerable<Quest> quests = selectedFilter switch
+            {
+                QuestFilter.Available =>
+                    Quests.Where(q => q.Status == QuestStatus.Available),
 
-            QuestFilter.InProgress =>
-                Quests.Where(q => q.Status == QuestStatus.InProgress),
+                QuestFilter.InProgress =>
+                    Quests.Where(q => q.Status == QuestStatus.InProgress),
 
-            QuestFilter.Completed =>
-                Quests.Where(q => q.Status == QuestStatus.Completed),
+                QuestFilter.Completed =>
+                    Quests.Where(q => q.Status == QuestStatus.Completed),
 
-            _ => Quests
-        };
+                _ => Quests
+            };
+
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                return quests;
+            }
+
+            return quests.Where(q =>
+                q.Name.Contains(
+                    searchText,
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                q.Description.Contains(
+                    searchText,
+                    StringComparison.OrdinalIgnoreCase));
+        }
+    }
 
     private Modal newQuestModal = default!;
     private Modal deleteQuestModal = default!;
