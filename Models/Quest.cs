@@ -4,6 +4,8 @@ namespace QuestBoard.Models;
 
 public class Quest
 {
+
+    public List<QuestObjective> Objectives { get; set; } = [];
     public int Id { get; set; }
 
     [Required]

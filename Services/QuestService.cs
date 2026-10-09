@@ -33,9 +33,7 @@ public class QuestService
     public void AddQuest(Quest quest)
     {
         quest.Id = _nextId++;
-
         _quests.Add(quest);
-
         SaveQuests();
     }
 
@@ -68,6 +66,69 @@ public class QuestService
         }
     }
 
+    public void AddObjective(int questId, string description)
+    {
+        var quest = _quests.FirstOrDefault(q => q.Id == questId);
+
+        if (quest is null || string.IsNullOrWhiteSpace(description))
+        {
+            return;
+        }
+
+        var nextObjectiveId = quest.Objectives.Count == 0
+            ? 1
+            : quest.Objectives.Max(o => o.Id) + 1;
+
+        quest.Objectives.Add(new QuestObjective
+        {
+            Id = nextObjectiveId,
+            Description = description.Trim()
+        });
+
+        SaveQuests();
+    }
+
+    public void ToggleObjective(int questId, int objectiveId)
+    {
+        var quest = _quests.FirstOrDefault(q => q.Id == questId);
+
+        var objective = quest?.Objectives.FirstOrDefault(
+            o => o.Id == objectiveId);
+
+        if (objective is not null)
+        {
+            objective.IsCompleted = !objective.IsCompleted;
+            SaveQuests();
+
+            // Completing every objective completes the quest.
+            if (quest!.Objectives.Count > 0 &&
+                quest.Objectives.All(o => o.IsCompleted))
+            {
+                quest.Status = QuestStatus.Completed;
+                SaveQuests();
+            }
+            else if (quest.Status == QuestStatus.Completed)
+            {
+                quest.Status = QuestStatus.InProgress;
+                SaveQuests();
+            }
+        }
+    }
+
+    public void DeleteObjective(int questId, int objectiveId)
+    {
+        var quest = _quests.FirstOrDefault(q => q.Id == questId);
+
+        var objective = quest?.Objectives.FirstOrDefault(
+            o => o.Id == objectiveId);
+
+        if (objective is not null)
+        {
+            quest!.Objectives.Remove(objective);
+            SaveQuests();
+        }
+    }
+
     public void DeleteQuest(int questId)
     {
         var quest = _quests.FirstOrDefault(q => q.Id == questId);
@@ -88,6 +149,12 @@ public class QuestService
             _quests = JsonSerializer.Deserialize<List<Quest>>(json)
                       ?? [];
 
+            // Protect against older save files with no objectives.
+            foreach (var quest in _quests)
+            {
+                quest.Objectives ??= [];
+            }
+
             _nextId = _quests.Count == 0
                 ? 1
                 : _quests.Max(q => q.Id) + 1;
@@ -104,7 +171,13 @@ public class QuestService
                 Description = "A band of goblins has been raiding farms outside the village.",
                 Difficulty = QuestDifficulty.Easy,
                 Status = QuestStatus.Available,
-                Reward = "100 gp"
+                Reward = "100 gp",
+                Objectives =
+                [
+                    new() { Id = 1, Description = "Find the goblin camp" },
+                    new() { Id = 2, Description = "Defeat the goblin leader" },
+                    new() { Id = 3, Description = "Protect the nearby farms" }
+                ]
             },
             new()
             {
@@ -113,7 +186,13 @@ public class QuestService
                 Description = "Something ancient has awakened beneath the old cemetery.",
                 Difficulty = QuestDifficulty.Hard,
                 Status = QuestStatus.InProgress,
-                Reward = "750 XP + enchanted sword"
+                Reward = "750 XP + enchanted sword",
+                Objectives =
+                [
+                    new() { Id = 1, Description = "Find the crypt entrance" },
+                    new() { Id = 2, Description = "Defeat the undead guardian" },
+                    new() { Id = 3, Description = "Recover the ancient relic" }
+                ]
             },
             new()
             {
@@ -122,7 +201,13 @@ public class QuestService
                 Description = "Retrieve the lost crown from the dragon's mountain lair.",
                 Difficulty = QuestDifficulty.Deadly,
                 Status = QuestStatus.Available,
-                Reward = "5,000 gp"
+                Reward = "5,000 gp",
+                Objectives =
+                [
+                    new() { Id = 1, Description = "Reach the mountain lair" },
+                    new() { Id = 2, Description = "Overcome the dragon" },
+                    new() { Id = 3, Description = "Retrieve the lost crown" }
+                ]
             }
         ];
 

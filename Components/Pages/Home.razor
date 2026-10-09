@@ -97,7 +97,10 @@
                 <div class="col-12 col-md-6 col-lg-4" @key="quest.Id">
 
                     <QuestCard Quest="@quest" StatusChanged="@((QuestStatus status) => UpdateQuestStatus(quest.Id, status))"
-                               EditRequested="@OpenEditQuestModal" Deleted="@(() => RequestDeleteQuest(quest))" />
+                               EditRequested="@OpenEditQuestModal" Deleted="@(() => RequestDeleteQuest(quest))"
+                               ObjectiveToggled="@((int objectiveId) => ToggleObjective(quest.Id, objectiveId))"
+                               ObjectiveAdded="@((string description) => AddObjective(quest.Id, description))"
+                               ObjectiveDeleted="@((int objectiveId) => DeleteObjective(quest.Id, objectiveId))" />
 
                 </div>
             }
@@ -124,7 +127,6 @@
     <BodyTemplate>
 
         <EditForm EditContext="newQuestEditContext">
-
             <DataAnnotationsValidator />
 
             <div class="mb-3">
@@ -165,7 +167,6 @@
 
                 <ValidationMessage For="@(() => newQuest.Reward)" />
             </div>
-
         </EditForm>
 
     </BodyTemplate>
@@ -190,7 +191,6 @@
     <BodyTemplate>
 
         <EditForm EditContext="editQuestEditContext">
-
             <DataAnnotationsValidator />
 
             <div class="mb-3">
@@ -231,7 +231,6 @@
 
                 <ValidationMessage For="@(() => editQuest.Reward)" />
             </div>
-
         </EditForm>
 
     </BodyTemplate>
@@ -407,7 +406,7 @@
 
     private async Task OpenEditQuestModal(Quest quest)
     {
-        // Edit a copy so Cancel won't change the original quest.
+        // Edit a copy so Cancel doesn't change the original.
         editQuest = new Quest
         {
             Id = quest.Id,
@@ -415,7 +414,8 @@
             Description = quest.Description,
             Difficulty = quest.Difficulty,
             Status = quest.Status,
-            Reward = quest.Reward
+            Reward = quest.Reward,
+            Objectives = quest.Objectives
         };
 
         editQuestEditContext = new EditContext(editQuest);
@@ -441,6 +441,21 @@
     private void UpdateQuestStatus(int questId, QuestStatus status)
     {
         QuestService.UpdateStatus(questId, status);
+    }
+
+    private void ToggleObjective(int questId, int objectiveId)
+    {
+        QuestService.ToggleObjective(questId, objectiveId);
+    }
+
+    private void AddObjective(int questId, string description)
+    {
+        QuestService.AddObjective(questId, description);
+    }
+
+    private void DeleteObjective(int questId, int objectiveId)
+    {
+        QuestService.DeleteObjective(questId, objectiveId);
     }
 
     private async Task RequestDeleteQuest(Quest quest)

@@ -24,6 +24,62 @@
             @Quest.Status
         </Badge>
 
+        <!-- Objective progress -->
+        <div class="mt-4 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong>Objectives</strong>
+                <small class="text-muted">
+                    @CompletedObjectiveCount / @Quest.Objectives.Count
+                </small>
+            </div>
+
+            @if (Quest.Objectives.Count > 0)
+            {
+                <div class="progress mb-3" role="progressbar" aria-label="Objective completion"
+                     aria-valuenow="@ObjectiveProgressPercent" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar" style="@($"width: {ObjectiveProgressPercent}%")">
+                    </div>
+                </div>
+
+                @foreach (var objective in Quest.Objectives)
+                {
+                    <div class="d-flex align-items-center gap-2 mb-2" @key="objective.Id">
+
+                        <input class="form-check-input mt-0" type="checkbox" id="@($"objective-{Quest.Id}-{objective.Id}")"
+                               checked="@objective.IsCompleted" @onchange="() => ToggleObjective(objective.Id)" />
+
+                        <label
+                            class="form-check-label flex-grow-1 @(objective.IsCompleted ? "text-decoration-line-through text-muted" : "")"
+                            for="@($"objective-{Quest.Id}-{objective.Id}")">
+                            @objective.Description
+                        </label>
+
+                        <button type="button" class="btn btn-sm btn-outline-danger" title="Remove objective"
+                                aria-label="@($"Remove objective: {objective.Description}")"
+                                @onclick="() => DeleteObjective(objective.Id)">
+                            ×
+                        </button>
+
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-muted small mb-2">
+                    No objectives yet. Add one below!
+                </p>
+            }
+
+            <div class="input-group input-group-sm mt-3">
+                <input class="form-control" placeholder="Add an objective..." @bind="newObjectiveDescription"
+                       @bind:event="oninput" @onkeydown="HandleObjectiveKeyDown" />
+
+                <button type="button" class="btn btn-outline-primary" @onclick="AddObjective">
+                    Add
+                </button>
+            </div>
+        </div>
+
         <div class="mt-3 d-flex flex-wrap gap-2">
 
             @if (Quest.Status == QuestStatus.Available)
@@ -65,6 +121,25 @@
     [Parameter]
     public EventCallback Deleted { get; set; }
 
+    [Parameter]
+    public EventCallback<int> ObjectiveToggled { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ObjectiveAdded { get; set; }
+
+    [Parameter]
+    public EventCallback<int> ObjectiveDeleted { get; set; }
+
+    private string newObjectiveDescription = string.Empty;
+
+    private int CompletedObjectiveCount =>
+        Quest.Objectives.Count(o => o.IsCompleted);
+
+    private int ObjectiveProgressPercent =>
+        Quest.Objectives.Count == 0
+            ? 0
+            : CompletedObjectiveCount * 100 / Quest.Objectives.Count;
+
     private async Task StartQuest()
     {
         await StatusChanged.InvokeAsync(QuestStatus.InProgress);
@@ -83,6 +158,37 @@
     private async Task RequestDelete()
     {
         await Deleted.InvokeAsync();
+    }
+
+    private async Task ToggleObjective(int objectiveId)
+    {
+        await ObjectiveToggled.InvokeAsync(objectiveId);
+    }
+
+    private async Task AddObjective()
+    {
+        if (string.IsNullOrWhiteSpace(newObjectiveDescription))
+        {
+            return;
+        }
+
+        await ObjectiveAdded.InvokeAsync(newObjectiveDescription);
+
+        newObjectiveDescription = string.Empty;
+    }
+
+    private async Task HandleObjectiveKeyDown(
+        Microsoft.AspNetCore.Components.Web.KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await AddObjective();
+        }
+    }
+
+    private async Task DeleteObjective(int objectiveId)
+    {
+        await ObjectiveDeleted.InvokeAsync(objectiveId);
     }
 
     private BadgeColor GetDifficultyColor()
