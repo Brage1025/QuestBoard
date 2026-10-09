@@ -39,7 +39,7 @@
                 </Button>
             }
 
-            <Button Color="ButtonColor.Danger" Size="ButtonSize.Small" @onclick="DeleteQuest">
+            <Button Color="ButtonColor.Danger" Size="ButtonSize.Small" @onclick="RequestDelete">
                 Delete
             </Button>
 
@@ -49,7 +49,6 @@
 </Card>
 
 @code {
-
     [Parameter]
     public Quest Quest { get; set; } = default!;
 
@@ -69,7 +68,7 @@
         await StatusChanged.InvokeAsync(QuestStatus.Completed);
     }
 
-    private async Task DeleteQuest()
+    private async Task RequestDelete()
     {
         await Deleted.InvokeAsync();
     }

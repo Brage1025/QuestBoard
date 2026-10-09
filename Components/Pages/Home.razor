@@ -23,6 +23,7 @@
         </Button>
     </div>
 
+    <!-- Dashboard counters -->
     <div class="row g-3 mb-4">
 
         <div class="col-md-4">
@@ -55,7 +56,7 @@
     </div>
 
     <!-- Quest filters -->
-    <div class="d-flex gap-2 mb-4">
+    <div class="d-flex flex-wrap gap-2 mb-4">
 
         <Button Color="@GetFilterButtonColor(QuestFilter.All)" @onclick="() => SetFilter(QuestFilter.All)">
             All
@@ -81,10 +82,10 @@
 
         @foreach (var quest in FilteredQuests)
         {
-            <div class="col-12 col-md-6 col-lg-4">
+            <div class="col-12 col-md-6 col-lg-4" @key="quest.Id">
 
                 <QuestCard Quest="@quest" StatusChanged="@((QuestStatus status) => UpdateQuestStatus(quest.Id, status))"
-                           Deleted="@(() => DeleteQuest(quest.Id))" />
+                           Deleted="@(() => RequestDeleteQuest(quest))" />
 
             </div>
         }
@@ -93,6 +94,7 @@
 
 </div>
 
+<!-- Create quest modal -->
 <Modal @ref="newQuestModal" Title="Create New Quest" IsVerticallyCentered="true">
 
     <BodyTemplate>
@@ -158,6 +160,36 @@
 
 </Modal>
 
+<!-- Delete confirmation modal -->
+<Modal @ref="deleteQuestModal" Title="Delete Quest?" IsVerticallyCentered="true">
+
+    <BodyTemplate>
+
+        <p>
+            Are you sure you want to delete
+            <strong>@(questToDelete?.Name ?? "this quest")</strong>?
+        </p>
+
+        <p class="text-muted mb-0">
+            This action cannot be undone.
+        </p>
+
+    </BodyTemplate>
+
+    <FooterTemplate>
+
+        <Button Color="ButtonColor.Secondary" @onclick="CancelDelete">
+            Cancel
+        </Button>
+
+        <Button Color="ButtonColor.Danger" @onclick="ConfirmDelete">
+            Yes, Delete
+        </Button>
+
+    </FooterTemplate>
+
+</Modal>
+
 @code {
 
     private List<Quest> Quests => QuestService.GetQuests();
@@ -189,6 +221,9 @@
         };
 
     private Modal newQuestModal = default!;
+    private Modal deleteQuestModal = default!;
+
+    private Quest? questToDelete;
 
     private Quest newQuest = new()
     {
@@ -261,9 +296,27 @@
         QuestService.UpdateStatus(questId, status);
     }
 
-    private void DeleteQuest(int questId)
+    private async Task RequestDeleteQuest(Quest quest)
     {
-        QuestService.DeleteQuest(questId);
+        questToDelete = quest;
+        await deleteQuestModal.ShowAsync();
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (questToDelete is not null)
+        {
+            QuestService.DeleteQuest(questToDelete.Id);
+            questToDelete = null;
+        }
+
+        await deleteQuestModal.HideAsync();
+    }
+
+    private async Task CancelDelete()
+    {
+        questToDelete = null;
+        await deleteQuestModal.HideAsync();
     }
 
     private enum QuestFilter
