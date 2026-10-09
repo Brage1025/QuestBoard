@@ -4,7 +4,7 @@
 
 <h1 align="center" style="color:#f2d58a">Quest Board</h1>
 
-A fantasy-themed quest management web application inspired with a classic RPG quest logs vibe Built as a full-stack learning project.
+A fantasy-themed quest management web application inspired with a classic RPG quest logs vibe. Built as a full-stack learning project.
 
 ## Features
 
