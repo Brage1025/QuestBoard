@@ -97,7 +97,7 @@
                 <div class="col-12 col-md-6 col-lg-4" @key="quest.Id">
 
                     <QuestCard Quest="@quest" StatusChanged="@((QuestStatus status) => UpdateQuestStatus(quest.Id, status))"
-                               Deleted="@(() => RequestDeleteQuest(quest))" />
+                               EditRequested="@OpenEditQuestModal" Deleted="@(() => RequestDeleteQuest(quest))" />
 
                 </div>
             }
@@ -123,7 +123,7 @@
 
     <BodyTemplate>
 
-        <EditForm EditContext="newQuestEditContext" OnValidSubmit="CreateQuest">
+        <EditForm EditContext="newQuestEditContext">
 
             <DataAnnotationsValidator />
 
@@ -178,6 +178,72 @@
 
         <Button Color="ButtonColor.Primary" @onclick="SubmitNewQuest">
             Create Quest
+        </Button>
+
+    </FooterTemplate>
+
+</Modal>
+
+<!-- Edit quest modal -->
+<Modal @ref="editQuestModal" Title="Edit Quest" IsVerticallyCentered="true">
+
+    <BodyTemplate>
+
+        <EditForm EditContext="editQuestEditContext">
+
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label class="form-label">Quest Name</label>
+
+                <InputText @bind-Value="editQuest.Name" class="form-control" />
+
+                <ValidationMessage For="@(() => editQuest.Name)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+
+                <InputTextArea @bind-Value="editQuest.Description" class="form-control" rows="3" />
+
+                <ValidationMessage For="@(() => editQuest.Description)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Difficulty</label>
+
+                <InputSelect @bind-Value="editQuest.Difficulty" class="form-select">
+
+                    @foreach (var difficulty in Enum.GetValues<QuestDifficulty>())
+                    {
+                        <option value="@difficulty">
+                            @difficulty
+                        </option>
+                    }
+
+                </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Reward</label>
+
+                <InputText @bind-Value="editQuest.Reward" class="form-control" />
+
+                <ValidationMessage For="@(() => editQuest.Reward)" />
+            </div>
+
+        </EditForm>
+
+    </BodyTemplate>
+
+    <FooterTemplate>
+
+        <Button Color="ButtonColor.Secondary" @onclick="CancelEditQuest">
+            Cancel
+        </Button>
+
+        <Button Color="ButtonColor.Primary" @onclick="SubmitEditQuest">
+            Save Changes
         </Button>
 
     </FooterTemplate>
@@ -264,6 +330,7 @@
     }
 
     private Modal newQuestModal = default!;
+    private Modal editQuestModal = default!;
     private Modal deleteQuestModal = default!;
 
     private Quest? questToDelete;
@@ -274,11 +341,15 @@
         Status = QuestStatus.Available
     };
 
+    private Quest editQuest = new();
+
     private EditContext newQuestEditContext = default!;
+    private EditContext editQuestEditContext = default!;
 
     protected override void OnInitialized()
     {
         newQuestEditContext = new EditContext(newQuest);
+        editQuestEditContext = new EditContext(editQuest);
     }
 
     private void SetFilter(QuestFilter filter)
@@ -332,6 +403,39 @@
     private async Task CloseNewQuestModal()
     {
         await newQuestModal.HideAsync();
+    }
+
+    private async Task OpenEditQuestModal(Quest quest)
+    {
+        // Edit a copy so Cancel won't change the original quest.
+        editQuest = new Quest
+        {
+            Id = quest.Id,
+            Name = quest.Name,
+            Description = quest.Description,
+            Difficulty = quest.Difficulty,
+            Status = quest.Status,
+            Reward = quest.Reward
+        };
+
+        editQuestEditContext = new EditContext(editQuest);
+
+        await editQuestModal.ShowAsync();
+    }
+
+    private async Task SubmitEditQuest()
+    {
+        if (editQuestEditContext.Validate())
+        {
+            QuestService.UpdateQuest(editQuest);
+
+            await editQuestModal.HideAsync();
+        }
+    }
+
+    private async Task CancelEditQuest()
+    {
+        await editQuestModal.HideAsync();
     }
 
     private void UpdateQuestStatus(int questId, QuestStatus status)

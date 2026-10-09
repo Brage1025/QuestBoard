@@ -39,6 +39,24 @@ public class QuestService
         SaveQuests();
     }
 
+    public void UpdateQuest(Quest updatedQuest)
+    {
+        var existingQuest = _quests.FirstOrDefault(
+            q => q.Id == updatedQuest.Id);
+
+        if (existingQuest is null)
+        {
+            return;
+        }
+
+        existingQuest.Name = updatedQuest.Name;
+        existingQuest.Description = updatedQuest.Description;
+        existingQuest.Difficulty = updatedQuest.Difficulty;
+        existingQuest.Reward = updatedQuest.Reward;
+
+        SaveQuests();
+    }
+
     public void UpdateStatus(int questId, QuestStatus status)
     {
         var quest = _quests.FirstOrDefault(q => q.Id == questId);
@@ -77,7 +95,6 @@ public class QuestService
             return;
         }
 
-        // First launch: create the starter quests.
         _quests =
         [
             new()
